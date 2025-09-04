@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Controle de Comissões - Objetiva Solução">
+    <meta name="author" content="Objetiva Solução">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Controle de Comissões - Objetiva Solução</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-right: 1px solid #bdc3c7;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #d5dbdb;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-row-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-row-5 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .table th {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .card-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .preview-box {
+            background: #f8f9fa;
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .preview-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .preview-values {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .preview-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .preview-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .preview-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #27ae60;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .status-ativo {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        
+        .status-inativo {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+        
+        .status-fechada {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        
+        .status-pendente {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+        
+        .status-recebida {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+        
+        .alert-error {
+            background: #fadbd8;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+        
+        .alert-info {
+            background: #d6eaf8;
+            color: #2980b9;
+            border: 1px solid #2980b9;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .parcela-form {
+            background: #f8f9fa;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .filtros-parcelas {
+            background: #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .row-recebida {
+            background-color: #d5f4e6 !important;
+        }
+        
+        .relatorio-section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .relatorio-section.active {
+            display: block;
+        }
+        
+        .relatorio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .relatorio-filtros {
+            background: #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .chart-canvas {
+            max-height: 400px;
+        }
+        
+        .relatorio-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .relatorio-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 5px solid #3498db;
+        }
+        
+        .relatorio-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .relatorio-card.performance {
+            border-left-color: #3498db;
+        }
+        
+        .relatorio-card.financeiro {
+            border-left-color: #27ae60;
+        }
+        
+        .relatorio-card.vencimentos {
+            border-left-color: #f39c12;
+        }
+        
+        .relatorio-card.clientes {
+            border-left-color: #e74c3c;
+        }
+        
+        .relatorio-card-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .relatorio-card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .relatorio-card-desc {
+            color: #7f8c8d;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        
+        .back-button {
+            background: #95a5a6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background: #7f8c8d;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .save-button {
+            background: #27ae60;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .save-button:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        
+        .save-success {
+            display: none;
+            background: #d5f4e6;
+            color: #27ae60;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .projeto-info {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .projeto-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .projeto-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .projeto-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .projeto-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .valor-total .projeto-value {
+            color: #27ae60;
+            font-size: 1.4em;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .checkbox-group label {
+            margin: 0;
+            font-weight: 600;
+            color: #856404;
+        }
+        
+        .primeira-mensalidade {
+            background: #fff3cd !important;
+            border-left: 5px solid #ffc107 !important;
+        }
+        
+        .primeira-mensalidade .projeto-value {
+            color: #856404;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row, .form-row-3, .form-row-4, .form-row-5 {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏢 Sistema de Controle de Comissões</h1>
+        <p>Objetiva Solução - Gestão Completa de Vendas e Comissões</p>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(event, 'dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="openTab(event, 'vendedores')">👥 Vendedores</button>
+            <button class="tab" onclick="openTab(event, 'oportunidades')">🎯 Oportunidades</button>
+            <button class="tab" onclick="openTab(event, 'parcelas')">💰 Parcelas</button>
+            <button class="tab" onclick="openTab(event, 'relatorios')">📈 Relatórios</button>
+            <button class="tab" onclick="openTab(event, 'backup')">💾 Backup</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="tab-content active">
+            <h2>📊 Dashboard Executivo</h2>
+            
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Vendedores Ativos</div>
+                    <div class="card-value" id="totalVendedores">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">Oportunidades</div>
+                    <div class="card-value" id="totalOportunidades">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💰</div>
+                    <div class="card-title">Parcelas</div>
+                    <div class="card-value" id="totalParcelas">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💵</div>
+                    <div class="card-title">Faturamento Total</div>
+                    <div class="card-value" id="faturamentoTotal">R$ 0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💼</div>
+                    <div class="card-title">Comissão Total</div>
+                    <div class="card-value" id="comissaoTotal">R$ 0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚠️</div>
+                    <div class="card-title">Parcelas Atrasadas</div>
+                    <div class="card-value" id="parcelasAtrasadas">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vendedores -->
+        <div id="vendedores" class="tab-content">
+            <h2>👥 Gestão de Vendedores</h2>
+            
+            <form id="vendedorForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nomeVendedor">Nome Completo:</label>
+                        <input type="text" id="nomeVendedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailVendedor">Email:</label>
+                        <input type="email" id="emailVendedor" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefoneVendedor">Telefone:</label>
+                        <input type="tel" id="telefoneVendedor">
+                    </div>
+                    <div class="form-group">
+                        <label for="dataAdmissao">Data de Admissão:</label>
+                        <input type="date" id="dataAdmissao">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observacoesVendedor">Observações:</label>
+                    <textarea id="observacoesVendedor" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="save-button">💾 Salvar Vendedor</button>
+                <div class="save-success" id="vendedorSaveSuccess">✅ Vendedor salvo com sucesso!</div>
+            </form>
+            
+            <table class="table" id="tabelaVendedores">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Data Admissão</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão preenchidos dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Oportunidades -->
+        <div id="oportunidades" class="tab-content">
+            <h2>🎯 Gestão de Oportunidades</h2>
+            
+            <form id="oportunidadeForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clienteOportunidade">Cliente:</label>
+                        <input type="text" id="clienteOportunidade" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vendedorOportunidade">Vendedor:</label>
+                        <select id="vendedorOportunidade" required>
+                            <option value="">Selecione um vendedor</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipoContaOportunidade">Tipo de Conta:</label>
+                        <select id="tipoContaOportunidade" required>
+                            <option value="">Selecione o tipo</option>
+                            <option value="New Name SAP (2%)">New Name SAP (2%)</option>
+                            <option value="New Name DiamondOne Cliente Final (2%)">New Name DiamondOne Cliente Final (2%)</option>
+                            <option value="New Name DiamondOne Canal (1%)">New Name DiamondOne Canal (1%)</option>
+                            <option value="Contas Herdadas (1%)">Contas Herdadas (1%)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mensalidadeOportunidade">Mensalidade:</label>
+                        <input type="text" id="mensalidadeOportunidade" placeholder="R$ 0,00" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="servicosOportunidade">Serviços:</label>
+                        <input type="text" id="servicosOportunidade" placeholder="R$ 0,00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dataFechamento">Data de Fechamento:</label>
+                        <input type="date" id="dataFechamento" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricaoOportunidade">Descrição:</label>
+                    <textarea id="descricaoOportunidade" rows="3"></textarea>
+                </div>
+                
+                <div class="preview-box" id="previewOportunidade">
+                    <div class="preview-title">💰 Preview da Comissão</div>
+                    <div class="preview-values">
+                        <div class="preview-item">
+                            <div class="preview-label">Valor Total do Projeto</div>
+                            <div class="preview-value" id="previewValorTotal">R$ 0,00</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Valor Líquido (após impostos 15%)</div>
+                            <div class="preview-value" id="previewValorLiquido">R$ 0,00</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Percentual de Comissão</div>
+                            <div class="preview-value" id="previewPercentual">0%</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Comissão Total</div>
+                            <div class="preview-value" id="previewComissao">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="save-button">💾 Salvar Oportunidade</button>
+                <div class="save-success" id="oportunidadeSaveSuccess">✅ Oportunidade salva com sucesso!</div>
+            </form>
+            
+            <table class="table" id="tabelaOportunidades">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Vendedor</th>
+                        <th>Tipo</th>
+                        <th>Valor Total</th>
+                        <th>Comissão</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão preenchidos dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Parcelas -->
+        <div id="parcelas" class="tab-content">
+            <h2>💰 Gestão de Parcelas</h2>
+            
+            <!-- Filtros -->
+            <div class="filtros-parcelas">
+                <h3>🔍 Filtros</h3>
+                <div class="form-row-4">
+                    <div class="form-group">
+                        <label for="filtroVendedorParcela">Vendedor:</label>
+                        <select id="filtroVendedorParcela">
+                            <option value="">Todos os vendedores</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtroStatusParcela">Status:</label>
+                        <select id="filtroStatusParcela">
+                            <option value="">Todos os status</option>
+                            <option value="pendente">Pendentes</option>
+                            <option value="recebida">Recebidas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtroClienteParcela">Cliente:</label>
+                        <input type="text" id="filtroClienteParcela" placeholder="Buscar por cliente...">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button type="button" class="btn btn-info" onclick="aplicarFiltrosParcelas()">🔍 Filtrar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulário de Parcelas -->
+            <div class="parcela-form">
+                <h3>➕ Cadastrar Nova Parcela</h3>
+                
+                <form id="parcelaForm">
+                    <div class="form-group">
+                        <label for="oportunidadeParcela">Oportunidade:</label>
+                        <select id="oportunidadeParcela" required>
+                            <option value="">Selecione uma oportunidade</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Informações do Projeto -->
+                    <div id="projetoInfo" class="projeto-info hidden">
+                        <h3>📋 Informações do Projeto</h3>
+                        <div class="projeto-details">
+                            <div class="projeto-item">
+                                <div class="projeto-label">Cliente</div>
+                                <div class="projeto-value" id="projetoCliente">-</div>
+                            </div>
+                            <div class="projeto-item">
+                                <div class="projeto-label">Vendedor</div>
+                                <div class="projeto-value" id="projetoVendedor">-</div>
+                            </div>
+                            <div class="projeto-item">
+                                <div class="projeto-label">Tipo de Conta</div>
+                                <div class="projeto-value" id="projetoTipo">-</div>
+                            </div>
+                            <div class="projeto-item valor-total">
+                                <div class="projeto-label">💰 VALOR TOTAL DO PROJETO</div>
+                                <div class="projeto-value" id="projetoValorTotal">R$ 0,00</div>
+                            </div>
+                            <div class="projeto-item parcelas-info">
+                                <div class="projeto-label">📊 Parcelas Cadastradas</div>
+                                <div class="projeto-value" id="projetoParcelasCadastradas">0 parcelas</div>
+                            </div>
+                            <div class="projeto-item valor-parcelado">
+                                <div class="projeto-label">💵 Valor Já Parcelado</div>
+                                <div class="projeto-value" id="projetoValorParcelado">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Checkbox para primeira mensalidade -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="primeiraMensalidade">
+                        <label for="primeiraMensalidade">✨ Esta é a primeira mensalidade (não conta como parcela numerada)</label>
+                    </div>
+                    
+                    <div class="form-row-4">
+                        <div class="form-group">
+                            <label for="numeroParcela">Número da Parcela:</label>
+                            <input type="text" id="numeroParcela" placeholder="Ex: 1ª, 2ª, 3ª..." required>
+                        </div>
+                        <div class="form-group">
+                            <label for="valorParcela">Valor da Parcela (R$):</label>
+                            <input type="number" id="valorParcela" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vencimentoParcela">Data de Vencimento:</label>
+                            <input type="date" id="vencimentoParcela" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pagamentoComissao">Pagamento Comissão:</label>
+                            <input type="date" id="pagamentoComissao" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observacoesParcela">Observações:</label>
+                        <textarea id="observacoesParcela" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="preview-box">
+                        <div class="preview-title">💰 Preview da Comissão desta Parcela</div>
+                        <div class="preview-values">
+                            <div class="preview-item">
+                                <div class="preview-label">Valor da Parcela (Bruto)</div>
+                                <div class="preview-value" id="previewValorParcela">R$ 0,00</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">Imposto (15%)</div>
+                                <div class="preview-value" id="previewImposto">R$ 0,00</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">Valor Líquido</div>
+                                <div class="preview-value" id="previewValorLiquidoParcela">R$ 0,00</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">Percentual</div>
+                                <div class="preview-value" id="previewPercentualParcela">0%</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">Comissão da Parcela</div>
+                                <div class="preview-value" id="previewComissaoParcela">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="save-button">💾 Salvar Parcela</button>
+                    <div class="save-success" id="parcelaSaveSuccess">✅ Parcela salva com sucesso!</div>
+                </form>
+            </div>
+            
+            <table class="table" id="tabelaParcelas">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Vendedor</th>
+                        <th>Parcela</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                        <th>Pagamento Comissão</th>
+                        <th>Comissão</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão preenchidos dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Relatórios -->
+        <div id="relatorios" class="tab-content">
+            <h2>📈 Central de Relatórios</h2>
+            
+            <!-- Menu Principal de Relatórios -->
+            <div id="relatoriosMenu">
+                <div class="relatorio-cards">
+                    <!-- Relatórios de Performance -->
+                    <div class="relatorio-card performance" onclick="mostrarRelatorio('vendas-vendedor')">
+                        <div class="relatorio-card-icon">📊</div>
+                        <div class="relatorio-card-title">Vendas por Vendedor</div>
+                        <div class="relatorio-card-desc">Análise detalhada das vendas e comissões por vendedor</div>
+                    </div>
+                    
+                    <div class="relatorio-card performance" onclick="mostrarRelatorio('ranking-vendedores')">
+                        <div class="relatorio-card-icon">🏆</div>
+                        <div class="relatorio-card-title">Ranking de Vendedores</div>
+                        <div class="relatorio-card-desc">Classificação dos vendedores por performance</div>
+                    </div>
+                    
+                    <div class="relatorio-card financeiro" onclick="mostrarRelatorio('comissoes-pagar')">
+                        <div class="relatorio-card-icon">💰</div>
+                        <div class="relatorio-card-title">Comissões a Pagar</div>
+                        <div class="relatorio-card-desc">Relatório mensal para pagamento de comissões</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Relatório Vendas por Vendedor -->
+            <div id="vendas-vendedor" class="relatorio-section">
+                <button class="back-button" onclick="voltarRelatorios()">← Voltar aos Relatórios</button>
+                <div class="relatorio-header">
+                    <h3>📊 Vendas por Vendedor</h3>
+                    <button class="btn btn-info" onclick="exportarRelatorio('vendas-vendedor')">📄 Exportar</button>
+                </div>
+                
+                <table class="table" id="tabelaVendasVendedor">
+                    <thead>
+                        <tr>
+                            <th>Vendedor</th>
+                            <th>Oportunidades</th>
+                            <th>Valor Total</th>
+                            <th>Comissão Total</th>
+                            <th>Ticket Médio</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Relatório Ranking de Vendedores -->
+            <div id="ranking-vendedores" class="relatorio-section">
+                <button class="back-button" onclick="voltarRelatorios()">← Voltar aos Relatórios</button>
+                <div class="relatorio-header">
+                    <h3>🏆 Ranking de Vendedores</h3>
+                    <button class="btn btn-info" onclick="exportarRelatorio('ranking-vendedores')">📄 Exportar</button>
+                </div>
+                
+                <table class="table" id="tabelaRankingVendedores">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Vendedor</th>
+                            <th>Vendas</th>
+                            <th>Valor Total</th>
+                            <th>Comissão</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Relatório Comissões a Pagar -->
+            <div id="comissoes-pagar" class="relatorio-section">
+                <button class="back-button" onclick="voltarRelatorios()">← Voltar aos Relatórios</button>
+                <div class="relatorio-header">
+                    <h3>💰 Comissões a Pagar no Mês</h3>
+                    <button class="btn btn-info" onclick="exportarRelatorio('comissoes-pagar')">📄 Exportar</button>
+                </div>
+                
+                <div class="relatorio-filtros">
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Mês/Ano:</label>
+                            <input type="month" id="filtroMesComissoes" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Status:</label>
+                            <select id="filtroStatusComissoes">
+                                <option value="pendente">Apenas Pendentes</option>
+                                <option value="todos">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary" onclick="atualizarComissoesPagar()">🔄 Atualizar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-icon">💰</div>
+                        <div class="card-title">Total a Pagar</div>
+                        <div class="card-value" id="totalAPagarMes">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">👥</div>
+                        <div class="card-title">Vendedores</div>
+                        <div class="card-value" id="vendedoresComissao">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">📊</div>
+                        <div class="card-title">Parcelas</div>
+                        <div class="card-value" id="parcelasComissao">0</div>
+                    </div>
+                </div>
+                
+                <table class="table" id="tabelaComissoesPagar">
+                    <thead>
+                        <tr>
+                            <th>Vendedor</th>
+                            <th>Cliente</th>
+                            <th>Parcela</th>
+                            <th>Vencimento</th>
+                            <th>Valor Parcela</th>
+                            <th>Comissão</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Backup -->
+        <div id="backup" class="tab-content">
+            <h2>💾 Backup e Importação</h2>
+            
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Total de Registros</div>
+                    <div class="card-value" id="totalRegistros">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Vendedores</div>
+                    <div class="card-value" id="totalVendedoresBackup">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">Oportunidades</div>
+                    <div class="card-value" id="totalOportunidadesBackup">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💰</div>
+                    <div class="card-title">Parcelas</div>
+                    <div class="card-value" id="totalParcelasBackup">0</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <button class="btn btn-success" onclick="fazerBackupExcel()">📥 Fazer Backup Excel</button>
+                </div>
+                <div class="form-group">
+                    <label for="arquivoImportacao">Importar Dados:</label>
+                    <input type="file" id="arquivoImportacao" accept=".xlsx,.xls" onchange="importarDados(this)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados globais
+        let dadosGlobais = {
+            vendedores: [],
+            oportunidades: [],
+            parcelas: []
+        };
+        
+        // Função para aplicar máscara de moeda
+        function aplicarMascaraMoeda(input) {
+            let valor = input.value.replace(/\D/g, '');
+            valor = (valor / 100).toFixed(2) + '';
+            valor = valor.replace(".", ",");
+            valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+            input.value = 'R$ ' + valor;
+        }
+        
+        // Função para remover máscara e obter valor numérico
+        function obterValorNumerico(valorComMascara) {
+            return parseFloat(valorComMascara.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        }
+        
+        // Aplicar máscaras nos campos de moeda
+        document.addEventListener('DOMContentLoaded', function() {
+            const camposMoeda = ['mensalidadeOportunidade', 'servicosOportunidade'];
+            
+            camposMoeda.forEach(campoId => {
+                const campo = document.getElementById(campoId);
+                if (campo) {
+                    campo.addEventListener('input', function() {
+                        aplicarMascaraMoeda(this);
+                        calcularPreviewOportunidade();
+                    });
+                }
+            });
+        });
+        
+        // Função para calcular valor líquido (descontando 15% de imposto)
+        function calcularValorLiquido(valorBruto) {
+            return valorBruto * 0.85; // 85% do valor bruto (100% - 15% de imposto)
+        }
+        
+        // Carregar dados do localStorage
+        function carregarDadosGlobais() {
+            const dados = localStorage.getItem('dadosComissoes');
+            if (dados) {
+                dadosGlobais = JSON.parse(dados);
+            }
+            
+            // Carregar dados iniciais se não existirem
+            if (dadosGlobais.vendedores.length === 0) {
+                carregarDadosIniciais();
+            }
+        }
+        
+        // Salvar dados no localStorage
+        function salvarDadosGlobais() {
+            try {
+                localStorage.setItem('dadosComissoes', JSON.stringify(dadosGlobais));
+                return true;
+            } catch (error) {
+                console.error('Erro ao salvar dados:', error);
+                return false;
+            }
+        }
+        
+        // Carregar dados iniciais
+        function carregarDadosIniciais() {
+            // Dados de exemplo já convertidos
+            dadosGlobais = {
+                "vendedores": [
+                    {
+                        "id": "1756130166610",
+                        "nome": "Marcos Judsson",
+                        "email": "marcos@objetivasolucao.com.br",
+                        "telefone": "(11) 99999-9999",
+                        "dataAdmissao": "2024-01-15",
+                        "observacoes": "Vendedor experiente",
+                        "dataCadastro": "2025-08-25T10:30:00.000Z"
+                    }
+                ],
+                "oportunidades": [
+                    {
+                        "id": "1756130166611",
+                        "cliente": "MR Industria",
+                        "vendedor": "Marcos Judsson",
+                        "tipoConta": "New Name SAP (2%)",
+                        "mensalidade": 5000,
+                        "servicos": 2500,
+                        "valorTotal": 7500,
+                        "valorLiquido": 6375,
+                        "comissao": 127.5,
+                        "dataFechamento": "2024-12-01",
+                        "descricao": "Implementação SAP completa",
+                        "dataCadastro": "2025-08-25T10:30:00.000Z"
+                    },
+                    {
+                        "id": "1756130166612",
+                        "cliente": "Cava e Cava",
+                        "vendedor": "Marcos Judsson",
+                        "tipoConta": "New Name DiamondOne Cliente Final (2%)",
+                        "mensalidade": 3000,
+                        "servicos": 1500,
+                        "valorTotal": 4500,
+                        "valorLiquido": 3825,
+                        "comissao": 76.5,
+                        "dataFechamento": "2024-11-15",
+                        "descricao": "Sistema DiamondOne personalizado",
+                        "dataCadastro": "2025-08-25T10:30:00.000Z"
+                    },
+                    {
+                        "id": "1756130166613",
+                        "cliente": "Plastiweber",
+                        "vendedor": "Marcos Judsson",
+                        "tipoConta": "New Name DiamondOne Canal (1%)",
+                        "mensalidade": 8000,
+                        "servicos": 4000,
+                        "valorTotal": 12000,
+                        "valorLiquido": 10200,
+                        "comissao": 102,
+                        "dataFechamento": "2024-10-20",
+                        "descricao": "Integração via canal DiamondOne",
+                        "dataCadastro": "2025-08-25T10:30:00.000Z"
+                    }
+                ],
+                "parcelas": [
+                    {
+                        "id": "1756130166614",
+                        "oportunidadeId": "1756130166611",
+                        "cliente": "MR Industria",
+                        "vendedor": "Marcos Judsson",
+                        "numero": "1ª Parcela",
+                        "valor": 2500,
+                        "valorLiquido": 2125,
+                        "vencimento": "2025-01-15",
+                        "pagamentoComissao": "2025-02-10",
+                        "comissao": 42.5,
+                        "observacoes": "Primeira parcela do projeto",
+                        "status": "recebida",
+                        "primeiraMensalidade": false,
+                        "dataCadastro": "2025-08-25T10:30:00.000Z"
+                    },
+                    {
+                        "id": "1756130166615",
+                        "oportunidadeId": "1756130166611",
+                        "cliente": "MR Industria",
+                        "vendedor": "Marcos Judsson",
+                        "numero": "2ª Parcela",
+                        "valor": 2500,
+                        "valorLiquido": 2125,
+                        "vencimento": "2025-02-15",
+                        "pagamentoComissao": "2025-03-10",
+                        "comissao": 42.5,
+                        "observacoes": "Segunda parcela do projeto",
+                        "status": "pendente",
+                        "primeiraMensalidade": false,
+                        "dataCadastro": "2025-08-25T10:30:00.000Z"
+                    },
+                    {
+                        "id": "1756130166616",
+                        "oportunidadeId": "1756130166611",
+                        "cliente": "MR Industria",
+                        "vendedor": "Marcos Judsson",
+                        "numero": "1ª Mensalidade",
+                        "valor": 2500,
+                        "valorLiquido": 2125,
+                        "vencimento": "2025-03-15",
+                        "pagamentoComissao": "2025-04-10",
+                        "comissao": 42.5,
+                        "observacoes": "Primeira mensalidade do cliente",
+                        "status": "pendente",
+                        "primeiraMensalidade": true,
+                        "dataCadastro": "2025-08-25T10:30:00.000Z"
+                    }
+                ]
+            };
+            
+            salvarDadosGlobais();
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDadosGlobais();
+            carregarVendedores();
+            carregarOportunidades();
+            carregarParcelas();
+            atualizarDashboard();
+            carregarRelatorios();
+            carregarBackup();
+            
+            // Definir mês atual para filtros
+            const hoje = new Date();
+            const mesAtual = hoje.toISOString().slice(0, 7);
+            const filtroMes = document.getElementById('filtroMesComissoes');
+            if (filtroMes) {
+                filtroMes.value = mesAtual;
+            }
+        });
+        
+        // Função para alternar abas
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        // Atualizar dashboard
+        function atualizarDashboard() {
+            document.getElementById('totalVendedores').textContent = dadosGlobais.vendedores.length;
+            document.getElementById('totalOportunidades').textContent = dadosGlobais.oportunidades.length;
+            document.getElementById('totalParcelas').textContent = dadosGlobais.parcelas.length;
+            
+            const faturamentoTotal = dadosGlobais.oportunidades.reduce((sum, o) => sum + o.valorTotal, 0);
+            const comissaoTotal = dadosGlobais.oportunidades.reduce((sum, o) => sum + o.comissao, 0);
+            
+            const hoje = new Date();
+            const parcelasAtrasadas = dadosGlobais.parcelas.filter(p => {
+                const vencimento = new Date(p.vencimento);
+                return p.status === 'pendente' && vencimento < hoje;
+            }).length;
+            
+            document.getElementById('faturamentoTotal').textContent = `R$ ${faturamentoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('comissaoTotal').textContent = `R$ ${comissaoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('parcelasAtrasadas').textContent = parcelasAtrasadas;
+        }
+        
+        // Carregar vendedores
+        function carregarVendedores() {
+            const tbody = document.querySelector('#tabelaVendedores tbody');
+            tbody.innerHTML = '';
+            
+            dadosGlobais.vendedores.forEach(vendedor => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${vendedor.nome}</td>
+                    <td>${vendedor.email}</td>
+                    <td>${vendedor.telefone || '-'}</td>
+                    <td>${vendedor.dataAdmissao || '-'}</td>
+                    <td><span class="status-badge status-ativo">Ativo</span></td>
+                    <td>
+                        <button class="btn btn-warning" onclick="editarVendedor('${vendedor.id}')">✏️</button>
+                        <button class="btn btn-danger" onclick="excluirVendedor('${vendedor.id}')">🗑️</button>
+                    </td>
+                `;
+            });
+            
+            // Atualizar dropdown de vendedores
+            atualizarDropdownVendedores();
+        }
+        
+        // Atualizar dropdown de vendedores
+        function atualizarDropdownVendedores() {
+            const selects = ['vendedorOportunidade', 'filtroVendedorParcela'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    const valorAtual = select.value;
+                    select.innerHTML = '<option value="">Selecione um vendedor</option>';
+                    
+                    dadosGlobais.vendedores.forEach(vendedor => {
+                        const option = document.createElement('option');
+                        option.value = vendedor.nome;
+                        option.textContent = vendedor.nome;
+                        select.appendChild(option);
+                    });
+                    
+                    select.value = valorAtual;
+                }
+            });
+        }
+        
+        // Carregar oportunidades
+        function carregarOportunidades() {
+            const tbody = document.querySelector('#tabelaOportunidades tbody');
+            tbody.innerHTML = '';
+            
+            dadosGlobais.oportunidades.forEach(oportunidade => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${oportunidade.cliente}</td>
+                    <td>${oportunidade.vendedor}</td>
+                    <td>${oportunidade.tipoConta}</td>
+                    <td>R$ ${oportunidade.valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${oportunidade.comissao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td><span class="status-badge status-fechada">Fechada</span></td>
+                    <td>
+                        <button class="btn btn-warning" onclick="editarOportunidade('${oportunidade.id}')">✏️</button>
+                        <button class="btn btn-danger" onclick="excluirOportunidade('${oportunidade.id}')">🗑️</button>
+                    </td>
+                `;
+            });
+            
+            // Atualizar dropdown de oportunidades
+            atualizarDropdownOportunidades();
+        }
+        
+        // Atualizar dropdown de oportunidades
+        function atualizarDropdownOportunidades() {
+            const select = document.getElementById('oportunidadeParcela');
+            if (select) {
+                const valorAtual = select.value;
+                select.innerHTML = '<option value="">Selecione uma oportunidade</option>';
+                
+                dadosGlobais.oportunidades.forEach(oportunidade => {
+                    const option = document.createElement('option');
+                    option.value = oportunidade.id;
+                    option.textContent = `${oportunidade.cliente} - ${oportunidade.vendedor}`;
+                    select.appendChild(option);
+                });
+                
+                select.value = valorAtual;
+            }
+        }
+        
+        // Carregar parcelas
+        function carregarParcelas() {
+            const tbody = document.querySelector('#tabelaParcelas tbody');
+            tbody.innerHTML = '';
+            
+            dadosGlobais.parcelas.forEach(parcela => {
+                const row = tbody.insertRow();
+                if (parcela.status === 'recebida') {
+                    row.classList.add('row-recebida');
+                }
+                
+                // Verificar se é primeira mensalidade
+                const isPrimeiraMensalidade = parcela.primeiraMensalidade;
+                if (isPrimeiraMensalidade) {
+                    row.classList.add('primeira-mensalidade');
+                }
+                
+                const numeroDisplay = isPrimeiraMensalidade ? '✨ 1ª Mensalidade' : parcela.numero;
+                
+                row.innerHTML = `
+                    <td>${parcela.cliente}</td>
+                    <td>${parcela.vendedor}</td>
+                    <td>${numeroDisplay}</td>
+                    <td>R$ ${parcela.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>${new Date(parcela.vencimento).toLocaleDateString('pt-BR')}</td>
+                    <td>${new Date(parcela.pagamentoComissao).toLocaleDateString('pt-BR')}</td>
+                    <td>R$ ${parcela.comissao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td><span class="status-badge status-${parcela.status}">${parcela.status === 'recebida' ? 'Recebida' : 'Pendente'}</span></td>
+                    <td>
+                        <button class="btn btn-success" onclick="marcarComoRecebida('${parcela.id}')" ${parcela.status === 'recebida' ? 'disabled' : ''}>✅</button>
+                        <button class="btn btn-danger" onclick="excluirParcela('${parcela.id}')">🗑️</button>
+                    </td>
+                `;
+            });
+        }
+        
+        // Marcar parcela como recebida
+        function marcarComoRecebida(id) {
+            const parcela = dadosGlobais.parcelas.find(p => p.id === id);
+            if (parcela) {
+                parcela.status = 'recebida';
+                salvarDadosGlobais();
+                carregarParcelas();
+                atualizarDashboard();
+                mostrarSucesso('Parcela marcada como recebida!');
+            }
+        }
+        
+        // Formulário de vendedores
+        document.getElementById('vendedorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const vendedor = {
+                id: Date.now().toString(),
+                nome: document.getElementById('nomeVendedor').value,
+                email: document.getElementById('emailVendedor').value,
+                telefone: document.getElementById('telefoneVendedor').value,
+                dataAdmissao: document.getElementById('dataAdmissao').value,
+                observacoes: document.getElementById('observacoesVendedor').value,
+                dataCadastro: new Date().toISOString()
+            };
+            
+            dadosGlobais.vendedores.push(vendedor);
+            
+            if (salvarDadosGlobais()) {
+                document.getElementById('vendedorSaveSuccess').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('vendedorSaveSuccess').style.display = 'none';
+                }, 3000);
+                
+                this.reset();
+                carregarVendedores();
+                atualizarDashboard();
+                mostrarSucesso('Vendedor salvo com sucesso!');
+            } else {
+                mostrarErro('Erro ao salvar vendedor!');
+            }
+        });
+        
+        // Formulário de oportunidades
+        document.getElementById('oportunidadeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mensalidade = obterValorNumerico(document.getElementById('mensalidadeOportunidade').value);
+            const servicos = obterValorNumerico(document.getElementById('servicosOportunidade').value);
+            const valorTotal = mensalidade + servicos;
+            const valorLiquido = calcularValorLiquido(valorTotal);
+            const tipoConta = document.getElementById('tipoContaOportunidade').value;
+            const percentualComissao = (tipoConta.includes('2%')) ? 0.02 : 0.01;
+            const comissao = valorLiquido * percentualComissao;
+            
+            const oportunidade = {
+                id: Date.now().toString(),
+                cliente: document.getElementById('clienteOportunidade').value,
+                vendedor: document.getElementById('vendedorOportunidade').value,
+                tipoConta: tipoConta,
+                mensalidade: mensalidade,
+                servicos: servicos,
+                valorTotal: valorTotal,
+                valorLiquido: valorLiquido,
+                comissao: comissao,
+                dataFechamento: document.getElementById('dataFechamento').value,
+                descricao: document.getElementById('descricaoOportunidade').value,
+                dataCadastro: new Date().toISOString()
+            };
+            
+            dadosGlobais.oportunidades.push(oportunidade);
+            
+            if (salvarDadosGlobais()) {
+                document.getElementById('oportunidadeSaveSuccess').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('oportunidadeSaveSuccess').style.display = 'none';
+                }, 3000);
+                
+                this.reset();
+                carregarOportunidades();
+                atualizarDashboard();
+                mostrarSucesso('Oportunidade salva com sucesso!');
+            } else {
+                mostrarErro('Erro ao salvar oportunidade!');
+            }
+        });
+        
+        // Formulário de parcelas
+        document.getElementById('parcelaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const oportunidadeId = document.getElementById('oportunidadeParcela').value;
+            const oportunidade = dadosGlobais.oportunidades.find(o => o.id === oportunidadeId);
+            
+            if (!oportunidade) {
+                mostrarErro('Oportunidade não encontrada!');
+                return;
+            }
+            
+            const valorParcela = parseFloat(document.getElementById('valorParcela').value);
+            const valorLiquidoParcela = calcularValorLiquido(valorParcela);
+            const tipoConta = oportunidade.tipoConta;
+            const percentualComissao = (tipoConta.includes('2%')) ? 0.02 : 0.01;
+            const comissaoParcela = valorLiquidoParcela * percentualComissao;
+            const isPrimeiraMensalidade = document.getElementById('primeiraMensalidade').checked;
+            
+            const parcela = {
+                id: Date.now().toString(),
+                oportunidadeId: oportunidadeId,
+                cliente: oportunidade.cliente,
+                vendedor: oportunidade.vendedor,
+                numero: document.getElementById('numeroParcela').value,
+                valor: valorParcela,
+                valorLiquido: valorLiquidoParcela,
+                vencimento: document.getElementById('vencimentoParcela').value,
+                pagamentoComissao: document.getElementById('pagamentoComissao').value,
+                comissao: comissaoParcela,
+                observacoes: document.getElementById('observacoesParcela').value,
+                primeiraMensalidade: isPrimeiraMensalidade,
+                status: 'pendente',
+                dataCadastro: new Date().toISOString()
+            };
+            
+            dadosGlobais.parcelas.push(parcela);
+            
+            if (salvarDadosGlobais()) {
+                document.getElementById('parcelaSaveSuccess').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('parcelaSaveSuccess').style.display = 'none';
+                }, 3000);
+                
+                // Limpar apenas os campos de entrada, manter oportunidade selecionada
+                document.getElementById('numeroParcela').value = '';
+                document.getElementById('valorParcela').value = '';
+                document.getElementById('vencimentoParcela').value = '';
+                document.getElementById('pagamentoComissao').value = '';
+                document.getElementById('observacoesParcela').value = '';
+                document.getElementById('primeiraMensalidade').checked = false;
+                
+                carregarParcelas();
+                atualizarInfoProjeto();
+                atualizarDashboard();
+                mostrarSucesso('Parcela salva com sucesso!');
+            } else {
+                mostrarErro('Erro ao salvar parcela!');
+            }
+        });
+        
+        // Função para atualizar informações do projeto
+        function atualizarInfoProjeto() {
+            const oportunidadeId = document.getElementById('oportunidadeParcela').value;
+            const projetoInfo = document.getElementById('projetoInfo');
+            
+            if (!oportunidadeId) {
+                projetoInfo.classList.add('hidden');
+                return;
+            }
+            
+            const oportunidade = dadosGlobais.oportunidades.find(o => o.id === oportunidadeId);
+            if (!oportunidade) {
+                projetoInfo.classList.add('hidden');
+                return;
+            }
+            
+            // Calcular parcelas já cadastradas
+            const parcelasExistentes = dadosGlobais.parcelas.filter(p => p.oportunidadeId === oportunidadeId);
+            const valorParcelado = parcelasExistentes.reduce((sum, p) => sum + p.valor, 0);
+            
+            // Atualizar informações
+            document.getElementById('projetoCliente').textContent = oportunidade.cliente;
+            document.getElementById('projetoVendedor').textContent = oportunidade.vendedor;
+            document.getElementById('projetoTipo').textContent = oportunidade.tipoConta;
+            document.getElementById('projetoValorTotal').textContent = `R$ ${oportunidade.valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('projetoParcelasCadastradas').textContent = `${parcelasExistentes.length} parcelas`;
+            document.getElementById('projetoValorParcelado').textContent = `R$ ${valorParcelado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            projetoInfo.classList.remove('hidden');
+        }
+        
+        // Event listener para mudança na seleção de oportunidade
+        document.getElementById('oportunidadeParcela').addEventListener('change', function() {
+            atualizarInfoProjeto();
+        });
+        
+        // Event listener para calcular data de pagamento da comissão
+        document.getElementById('vencimentoParcela').addEventListener('change', function() {
+            const vencimento = new Date(this.value);
+            if (vencimento) {
+                // Adicionar um mês e definir dia 10
+                const pagamento = new Date(vencimento);
+                pagamento.setMonth(pagamento.getMonth() + 1);
+                pagamento.setDate(10);
+                
+                document.getElementById('pagamentoComissao').value = pagamento.toISOString().split('T')[0];
+            }
+        });
+        
+        // Event listeners para preview de comissão da oportunidade
+        document.getElementById('tipoContaOportunidade').addEventListener('change', calcularPreviewOportunidade);
+        
+        function calcularPreviewOportunidade() {
+            const mensalidade = obterValorNumerico(document.getElementById('mensalidadeOportunidade').value);
+            const servicos = obterValorNumerico(document.getElementById('servicosOportunidade').value);
+            const tipoConta = document.getElementById('tipoContaOportunidade').value;
+            
+            const valorTotal = mensalidade + servicos;
+            const valorLiquido = calcularValorLiquido(valorTotal);
+            const percentual = (tipoConta.includes('2%')) ? 2 : 1;
+            const comissao = valorLiquido * (percentual / 100);
+            
+            document.getElementById('previewValorTotal').textContent = `R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('previewValorLiquido').textContent = `R$ ${valorLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('previewPercentual').textContent = `${percentual}%`;
+            document.getElementById('previewComissao').textContent = `R$ ${comissao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+        
+        // Event listener para preview de comissão da parcela
+        document.getElementById('valorParcela').addEventListener('input', calcularPreviewParcela);
+        
+        function calcularPreviewParcela() {
+            const oportunidadeId = document.getElementById('oportunidadeParcela').value;
+            const valorParcela = parseFloat(document.getElementById('valorParcela').value) || 0;
+            
+            if (!oportunidadeId) return;
+            
+            const oportunidade = dadosGlobais.oportunidades.find(o => o.id === oportunidadeId);
+            if (!oportunidade) return;
+            
+            const valorLiquido = calcularValorLiquido(valorParcela);
+            const imposto = valorParcela - valorLiquido;
+            const tipoConta = oportunidade.tipoConta;
+            const percentual = (tipoConta.includes('2%')) ? 2 : 1;
+            const comissao = valorLiquido * (percentual / 100);
+            
+            document.getElementById('previewValorParcela').textContent = `R$ ${valorParcela.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('previewImposto').textContent = `R$ ${imposto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('previewValorLiquidoParcela').textContent = `R$ ${valorLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('previewPercentualParcela').textContent = `${percentual}%`;
+            document.getElementById('previewComissaoParcela').textContent = `R$ ${comissao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+        
+        // Funções de relatórios
+        function carregarRelatorios() {
+            // Carregar dados para filtros
+            atualizarDropdownVendedores();
+        }
+        
+        function mostrarRelatorio(relatorio) {
+            document.getElementById('relatoriosMenu').style.display = 'none';
+            document.getElementById(relatorio).classList.add('active');
+            
+            // Carregar dados específicos do relatório
+            switch(relatorio) {
+                case 'vendas-vendedor':
+                    carregarRelatorioVendasVendedor();
+                    break;
+                case 'ranking-vendedores':
+                    carregarRelatorioRankingVendedores();
+                    break;
+                case 'comissoes-pagar':
+                    atualizarComissoesPagar();
+                    break;
+            }
+        }
+        
+        function voltarRelatorios() {
+            document.querySelectorAll('.relatorio-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('relatoriosMenu').style.display = 'block';
+        }
+        
+        function carregarRelatorioVendasVendedor() {
+            const tbody = document.querySelector('#tabelaVendasVendedor tbody');
+            tbody.innerHTML = '';
+            
+            // Agrupar dados por vendedor
+            const vendedoresData = {};
+            
+            dadosGlobais.oportunidades.forEach(oportunidade => {
+                if (!vendedoresData[oportunidade.vendedor]) {
+                    vendedoresData[oportunidade.vendedor] = {
+                        oportunidades: 0,
+                        valorTotal: 0,
+                        comissaoTotal: 0
+                    };
+                }
+                
+                vendedoresData[oportunidade.vendedor].oportunidades++;
+                vendedoresData[oportunidade.vendedor].valorTotal += oportunidade.valorTotal;
+                vendedoresData[oportunidade.vendedor].comissaoTotal += oportunidade.comissao;
+            });
+            
+            // Preencher tabela
+            Object.keys(vendedoresData).forEach(vendedor => {
+                const data = vendedoresData[vendedor];
+                const ticketMedio = data.valorTotal / data.oportunidades;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${vendedor}</td>
+                    <td>${data.oportunidades}</td>
+                    <td>R$ ${data.valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${data.comissaoTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${ticketMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                `;
+            });
+        }
+        
+        function carregarRelatorioRankingVendedores() {
+            const tbody = document.querySelector('#tabelaRankingVendedores tbody');
+            tbody.innerHTML = '';
+            
+            // Agrupar e ordenar dados por vendedor
+            const vendedoresData = {};
+            
+            dadosGlobais.oportunidades.forEach(oportunidade => {
+                if (!vendedoresData[oportunidade.vendedor]) {
+                    vendedoresData[oportunidade.vendedor] = {
+                        vendas: 0,
+                        valorTotal: 0,
+                        comissao: 0
+                    };
+                }
+                
+                vendedoresData[oportunidade.vendedor].vendas++;
+                vendedoresData[oportunidade.vendedor].valorTotal += oportunidade.valorTotal;
+                vendedoresData[oportunidade.vendedor].comissao += oportunidade.comissao;
+            });
+            
+            // Converter para array e ordenar
+            const ranking = Object.keys(vendedoresData).map(vendedor => ({
+                vendedor,
+                ...vendedoresData[vendedor]
+            })).sort((a, b) => b.valorTotal - a.valorTotal);
+            
+            // Preencher tabela
+            ranking.forEach((item, index) => {
+                const performance = ranking.length > 0 ? (item.valorTotal / ranking[0].valorTotal * 100).toFixed(1) : 0;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}º</td>
+                    <td>${item.vendedor}</td>
+                    <td>${item.vendas}</td>
+                    <td>R$ ${item.valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${item.comissao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>${performance}%</td>
+                `;
+            });
+        }
+        
+        function atualizarComissoesPagar() {
+            const filtroMes = document.getElementById('filtroMesComissoes').value;
+            const filtroStatus = document.getElementById('filtroStatusComissoes').value;
+            
+            if (!filtroMes) return;
+            
+            const [ano, mes] = filtroMes.split('-');
+            const tbody = document.querySelector('#tabelaComissoesPagar tbody');
+            tbody.innerHTML = '';
+            
+            // Filtrar parcelas do mês
+            const parcelasFiltradas = dadosGlobais.parcelas.filter(parcela => {
+                const vencimento = new Date(parcela.vencimento);
+                const mesVencimento = vencimento.getMonth() + 1;
+                const anoVencimento = vencimento.getFullYear();
+                
+                const matchMes = mesVencimento == parseInt(mes) && anoVencimento == parseInt(ano);
+                const matchStatus = filtroStatus === 'todos' || 
+                    (filtroStatus === 'pendente' && parcela.status === 'pendente') ||
+                    (filtroStatus === 'recebida' && parcela.status === 'recebida');
+                
+                return matchMes && matchStatus;
+            });
+            
+            let totalAPagar = 0;
+            let vendedoresUnicos = new Set();
+            
+            // Preencher tabela
+            parcelasFiltradas.forEach(parcela => {
+                if (parcela.status === 'recebida') {
+                    totalAPagar += parcela.comissao;
+                    vendedoresUnicos.add(parcela.vendedor);
+                }
+                
+                const row = tbody.insertRow();
+                if (parcela.status === 'recebida') {
+                    row.classList.add('row-recebida');
+                }
+                
+                const numeroDisplay = parcela.primeiraMensalidade ? '✨ 1ª Mensalidade' : parcela.numero;
+                
+                row.innerHTML = `
+                    <td>${parcela.vendedor}</td>
+                    <td>${parcela.cliente}</td>
+                    <td>${numeroDisplay}</td>
+                    <td>${new Date(parcela.vencimento).toLocaleDateString('pt-BR')}</td>
+                    <td>R$ ${parcela.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${parcela.comissao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td><span class="status-badge status-${parcela.status}">${parcela.status === 'recebida' ? 'Recebida' : 'Pendente'}</span></td>
+                    <td>
+                        <button class="btn btn-success" onclick="marcarComoPaga('${parcela.id}')" ${parcela.status === 'recebida' ? '' : 'disabled'}>💰 Pagar</button>
+                    </td>
+                `;
+            });
+            
+            // Atualizar cards
+            document.getElementById('totalAPagarMes').textContent = `R$ ${totalAPagar.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('vendedoresComissao').textContent = vendedoresUnicos.size;
+            document.getElementById('parcelasComissao').textContent = parcelasFiltradas.length;
+        }
+        
+        function marcarComoPaga(id) {
+            const parcela = dadosGlobais.parcelas.find(p => p.id === id);
+            if (parcela && parcela.status === 'recebida') {
+                if (confirm('Confirma o pagamento desta comissão?')) {
+                    // Aqui você pode adicionar lógica adicional para marcar como paga
+                    // Por exemplo, adicionar um campo 'comissaoPaga' = true
+                    parcela.comissaoPaga = true;
+                    salvarDadosGlobais();
+                    atualizarComissoesPagar();
+                    mostrarSucesso('Comissão marcada como paga!');
+                }
+            }
+        }
+        
+        // Função para carregar backup
+        function carregarBackup() {
+            document.getElementById('totalRegistros').textContent = 
+                dadosGlobais.vendedores.length + dadosGlobais.oportunidades.length + dadosGlobais.parcelas.length;
+            document.getElementById('totalVendedoresBackup').textContent = dadosGlobais.vendedores.length;
+            document.getElementById('totalOportunidadesBackup').textContent = dadosGlobais.oportunidades.length;
+            document.getElementById('totalParcelasBackup').textContent = dadosGlobais.parcelas.length;
+        }
+        
+        // Função para fazer backup Excel
+        function fazerBackupExcel() {
+            try {
+                const wb = XLSX.utils.book_new();
+                
+                // Aba Vendedores
+                const vendedoresData = dadosGlobais.vendedores.map(v => ({
+                    'ID': v.id,
+                    'Nome': v.nome,
+                    'Email': v.email,
+                    'Telefone': v.telefone || '',
+                    'Data Admissão': v.dataAdmissao || '',
+                    'Status': 'Ativo',
+                    'Observações': v.observacoes || '',
+                    'Data Cadastro': v.dataCadastro || ''
+                }));
+                
+                const wsVendedores = XLSX.utils.json_to_sheet(vendedoresData);
+                XLSX.utils.book_append_sheet(wb, wsVendedores, 'Vendedores');
+                
+                // Aba Oportunidades
+                const oportunidadesData = dadosGlobais.oportunidades.map(o => ({
+                    'ID': o.id,
+                    'Cliente': o.cliente,
+                    'Vendedor': o.vendedor,
+                    'Tipo Conta': o.tipoConta,
+                    'Mensalidade': o.mensalidade,
+                    'Serviços': o.servicos,
+                    'Valor Total': o.valorTotal,
+                    'Valor Líquido': o.valorLiquido || calcularValorLiquido(o.valorTotal),
+                    'Comissão': o.comissao,
+                    'Status': 'Fechada',
+                    'Data Fechamento': o.dataFechamento || '',
+                    'Descrição': o.descricao || ''
+                }));
+                
+                const wsOportunidades = XLSX.utils.json_to_sheet(oportunidadesData);
+                XLSX.utils.book_append_sheet(wb, wsOportunidades, 'Oportunidades');
+                
+                // Aba Parcelas
+                const parcelasData = dadosGlobais.parcelas.map(p => {
+                    const hoje = new Date();
+                    const vencimento = new Date(p.vencimento);
+                    const diasAtraso = Math.floor((hoje - vencimento) / (1000 * 60 * 60 * 24));
+                    
+                    return {
+                        'ID': p.id,
+                        'Cliente': p.cliente,
+                        'Vendedor': p.vendedor,
+                        'Número Parcela': p.numero,
+                        'Primeira Mensalidade': p.primeiraMensalidade ? 'Sim' : 'Não',
+                        'Valor Parcela': p.valor,
+                        'Valor Líquido': p.valorLiquido || calcularValorLiquido(p.valor),
+                        'Comissão Parcela': p.comissao,
+                        'Data Vencimento': p.vencimento,
+                        'Data Pagamento Comissão': p.pagamentoComissao,
+                        'Status': p.status === 'recebida' ? 'Recebida' : 'Pendente',
+                        'Dias Atraso': p.status === 'pendente' && diasAtraso > 0 ? diasAtraso : 0,
+                        'Observações': p.observacoes || ''
+                    };
+                });
+                
+                const wsParcelas = XLSX.utils.json_to_sheet(parcelasData);
+                XLSX.utils.book_append_sheet(wb, wsParcelas, 'Parcelas');
+                
+                // Salvar arquivo
+                const hoje = new Date();
+                const dataFormatada = hoje.toISOString().split('T')[0];
+                const nomeArquivo = `backup_comissoes_${dataFormatada}.xlsx`;
+                
+                XLSX.writeFile(wb, nomeArquivo);
+                mostrarSucesso('Backup realizado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao gerar backup:', error);
+                mostrarErro('Erro ao gerar backup!');
+            }
+        }
+        
+        // Função para importar dados
+        function importarDados(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // Importar vendedores
+                    if (workbook.SheetNames.includes('Vendedores')) {
+                        const wsVendedores = workbook.Sheets['Vendedores'];
+                        const vendedoresImportados = XLSX.utils.sheet_to_json(wsVendedores);
+                        
+                        vendedoresImportados.forEach(v => {
+                            if (v.Nome && v.Email) {
+                                const vendedorExistente = dadosGlobais.vendedores.find(existing => existing.email === v.Email);
+                                if (!vendedorExistente) {
+                                    dadosGlobais.vendedores.push({
+                                        id: v.ID || Date.now().toString(),
+                                        nome: v.Nome,
+                                        email: v.Email,
+                                        telefone: v.Telefone || '',
+                                        dataAdmissao: v['Data Admissão'] || '',
+                                        observacoes: v.Observações || '',
+                                        dataCadastro: v['Data Cadastro'] || new Date().toISOString()
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Importar oportunidades
+                    if (workbook.SheetNames.includes('Oportunidades')) {
+                        const wsOportunidades = workbook.Sheets['Oportunidades'];
+                        const oportunidadesImportadas = XLSX.utils.sheet_to_json(wsOportunidades);
+                        
+                        oportunidadesImportadas.forEach(o => {
+                            if (o.Cliente && o.Vendedor) {
+                                const oportunidadeExistente = dadosGlobais.oportunidades.find(existing => 
+                                    existing.cliente === o.Cliente && existing.vendedor === o.Vendedor
+                                );
+                                if (!oportunidadeExistente) {
+                                    const valorTotal = o['Valor Total'] || 0;
+                                    const valorLiquido = o['Valor Líquido'] || calcularValorLiquido(valorTotal);
+                                    
+                                    dadosGlobais.oportunidades.push({
+                                        id: o.ID || Date.now().toString(),
+                                        cliente: o.Cliente,
+                                        vendedor: o.Vendedor,
+                                        tipoConta: o['Tipo Conta'] || 'New Name SAP (2%)',
+                                        mensalidade: o.Mensalidade || 0,
+                                        servicos: o.Serviços || 0,
+                                        valorTotal: valorTotal,
+                                        valorLiquido: valorLiquido,
+                                        comissao: o.Comissão || 0,
+                                        dataFechamento: o['Data Fechamento'] || '',
+                                        descricao: o.Descrição || '',
+                                        dataCadastro: new Date().toISOString()
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Importar parcelas
+                    if (workbook.SheetNames.includes('Parcelas')) {
+                        const wsParcelas = workbook.Sheets['Parcelas'];
+                        const parcelasImportadas = XLSX.utils.sheet_to_json(wsParcelas);
+                        
+                        parcelasImportadas.forEach(p => {
+                            if (p.Cliente && p.Vendedor) {
+                                const parcelaExistente = dadosGlobais.parcelas.find(existing => 
+                                    existing.cliente === p.Cliente && 
+                                    existing.vendedor === p.Vendedor && 
+                                    existing.numero === p['Número Parcela']
+                                );
+                                if (!parcelaExistente) {
+                                    // Encontrar oportunidade relacionada
+                                    const oportunidade = dadosGlobais.oportunidades.find(o => 
+                                        o.cliente === p.Cliente && o.vendedor === p.Vendedor
+                                    );
+                                    
+                                    const valorParcela = p['Valor Parcela'] || 0;
+                                    const valorLiquido = p['Valor Líquido'] || calcularValorLiquido(valorParcela);
+                                    
+                                    dadosGlobais.parcelas.push({
+                                        id: p.ID || Date.now().toString(),
+                                        oportunidadeId: oportunidade ? oportunidade.id : '',
+                                        cliente: p.Cliente,
+                                        vendedor: p.Vendedor,
+                                        numero: p['Número Parcela'] || '1ª',
+                                        valor: valorParcela,
+                                        valorLiquido: valorLiquido,
+                                        vencimento: p['Data Vencimento'] || '',
+                                        pagamentoComissao: p['Data Pagamento Comissão'] || '',
+                                        comissao: p['Comissão Parcela'] || 0,
+                                        observacoes: p.Observações || '',
+                                        primeiraMensalidade: p['Primeira Mensalidade'] === 'Sim',
+                                        status: p.Status === 'Recebida' ? 'recebida' : 'pendente',
+                                        dataCadastro: new Date().toISOString()
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Salvar e atualizar interface
+                    if (salvarDadosGlobais()) {
+                        carregarVendedores();
+                        carregarOportunidades();
+                        carregarParcelas();
+                        atualizarDashboard();
+                        carregarBackup();
+                        mostrarSucesso('Dados importados com sucesso!');
+                    } else {
+                        mostrarErro('Erro ao salvar dados importados!');
+                    }
+                    
+                } catch (error) {
+                    console.error('Erro ao importar:', error);
+                    mostrarErro('Erro ao importar arquivo!');
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // Funções auxiliares
+        function mostrarSucesso(mensagem) {
+            console.log('Sucesso:', mensagem);
+            // Aqui você pode implementar uma notificação visual
+        }
+        
+        function mostrarErro(mensagem) {
+            console.error('Erro:', mensagem);
+            // Aqui você pode implementar uma notificação visual
+        }
+        
+        // Funções de edição e exclusão
+        function editarVendedor(id) {
+            console.log('Editar vendedor:', id);
+        }
+        
+        function excluirVendedor(id) {
+            if (confirm('Tem certeza que deseja excluir este vendedor?')) {
+                dadosGlobais.vendedores = dadosGlobais.vendedores.filter(v => parseInt(v.id) !== parseInt(id));
+                salvarDadosGlobais();
+                carregarVendedores();
+                atualizarDashboard();
+                mostrarSucesso('Vendedor excluído com sucesso!');
+            }
+        }
+        
+        function editarOportunidade(id) {
+            console.log('Editar oportunidade:', id);
+        }
+        
+        function excluirOportunidade(id) {
+            if (confirm('Tem certeza que deseja excluir esta oportunidade? Todas as parcelas relacionadas também serão excluídas.')) {
+                // Excluir parcelas relacionadas
+                dadosGlobais.parcelas = dadosGlobais.parcelas.filter(p => p.oportunidadeId !== id);
+                // Excluir oportunidade
+                dadosGlobais.oportunidades = dadosGlobais.oportunidades.filter(o => parseInt(o.id) !== parseInt(id));
+                salvarDadosGlobais();
+                carregarOportunidades();
+                carregarParcelas();
+                atualizarDashboard();
+                mostrarSucesso('Oportunidade excluída com sucesso!');
+            }
+        }
+        
+        function excluirParcela(id) {
+            if (confirm('Tem certeza que deseja excluir esta parcela?')) {
+                dadosGlobais.parcelas = dadosGlobais.parcelas.filter(p => parseInt(p.id) !== parseInt(id));
+                salvarDadosGlobais();
+                carregarParcelas();
+                atualizarInfoProjeto();
+                atualizarDashboard();
+                mostrarSucesso('Parcela excluída com sucesso!');
+            }
+        }
+        
+        // Função para aplicar filtros nas parcelas
+        function aplicarFiltrosParcelas() {
+            // Implementar lógica de filtros
+            carregarParcelas();
+        }
+        
+        // Função para exportar relatório
+        function exportarRelatorio(relatorio) {
+            console.log('Exportar relatório:', relatorio);
+        }
+    </script>
+</body>
+</html>
+

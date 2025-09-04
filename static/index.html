@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Comissões - Objetiva Solução</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-box h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        /* Main Application */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            opacity: 0.3;
+        }
+        
+        /* Charts */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Progress Indicators */
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .add-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .add-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .table-content {
+            padding: 25px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            color: #666;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-pago {
+            background: #28a745;
+        }
+        
+        .status-pendente {
+            background: #ffc107;
+        }
+        
+        .status-primeira {
+            background: #17a2b8;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        .btn-edit {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        /* Forms */
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h1>Sistema de Comissões</h1>
+            <p>Objetiva Solução</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                <button type="submit" class="btn">Entrar</button>
+                <div id="loginError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="appContainer" class="app-container">
+        <header class="header">
+            <h1>Sistema de Comissões</h1>
+            <div class="user-info">
+                <span class="user-name" id="userName"></span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="showTab('vendedores')" id="vendedoresTab">Vendedores</button>
+                <button class="nav-tab" onclick="showTab('oportunidades')" id="oportunidadesTab">Oportunidades</button>
+                <button class="nav-tab" onclick="showTab('parcelas')">Parcelas</button>
+            </nav>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-number" id="totalOportunidades">0</div>
+                        <div class="stat-label">Oportunidades</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-number" id="totalVendedores">0</div>
+                        <div class="stat-label">Vendedores</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-number" id="totalComissoes">R$ 0</div>
+                        <div class="stat-label">Total Comissões</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-number" id="comissoesPagas">R$ 0</div>
+                        <div class="stat-label">Comissões Pagas</div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Status de Pagamentos</h3>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Parcelas Pagas</span>
+                                <span id="percentualPago">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressPago" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Comissões Pagas</span>
+                                <span id="percentualComissao">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressComissao" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3 class="chart-title">Resumo Financeiro</h3>
+                        <div style="padding: 20px; text-align: center;">
+                            <div style="margin-bottom: 15px;">
+                                <strong>Comissões Pendentes:</strong>
+                                <div style="font-size: 24px; color: #ffc107; margin-top: 5px;" id="comissoesPendentes">R$ 0</div>
+                            </div>
+                            <div>
+                                <strong>Total de Parcelas:</strong>
+                                <div style="font-size: 20px; color: #666; margin-top: 5px;" id="totalParcelas">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendedores Tab -->
+            <div id="vendedores" class="tab-content">
+                <div class="form-container" id="vendedorForm" style="display: none;">
+                    <h3>Cadastrar Vendedor</h3>
+                    <form id="formVendedor">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome:</label>
+                                <input type="text" name="nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email:</label>
+                                <input type="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Telefone:</label>
+                                <input type="text" name="telefone">
+                            </div>
+                            <div class="form-group">
+                                <label>Data de Admissão:</label>
+                                <input type="text" name="dataAdmissao" placeholder="DD/MM/AAAA">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Observações:</label>
+                                <textarea name="observacoes"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="cancelarVendedor()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3 class="table-title">Vendedores</h3>
+                        <button class="add-btn" onclick="novoVendedor()">+ Novo Vendedor</button>
+                    </div>
+                    <div class="table-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Telefone</th>
+                                    <th>Data Admissão</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vendedoresTable">
+                                <tr>
+                                    <td colspan="5" class="loading">
+                                        <div class="spinner"></div>
+                                        Carregando vendedores...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oportunidades Tab -->
+            <div id="oportunidades" class="tab-content">
+                <div class="form-container" id="oportunidadeForm" style="display: none;">
+                    <h3>Cadastrar Oportunidade</h3>
+                    <form id="formOportunidade">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Cliente:</label>
+                                <input type="text" name="cliente" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Vendedor:</label>
+                                <select name="vendedor" required id="selectVendedor">
+                                    <option value="">Selecione um vendedor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tipo de Conta:</label>
+                                <input type="text" name="tipoConta" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Data de Fechamento:</label>
+                                <input type="text" name="dataFechamento" placeholder="DD/MM/AAAA">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Mensalidade (R$):</label>
+                                <input type="number" name="mensalidade" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Serviços (R$):</label>
+                                <input type="number" name="servicos" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Valor Total (R$):</label>
+                                <input type="number" name="valorTotal" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Descrição:</label>
+                                <textarea name="descricao"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="cancelarOportunidade()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3 class="table-title">Oportunidades</h3>
+                        <button class="add-btn" onclick="novaOportunidade()">+ Nova Oportunidade</button>
+                    </div>
+                    <div class="table-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Vendedor</th>
+                                    <th>Tipo Conta</th>
+                                    <th>Valor Total</th>
+                                    <th>Valor Líquido</th>
+                                    <th>Comissão</th>
+                                    <th>Data Fechamento</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="oportunidadesTable">
+                                <tr>
+                                    <td colspan="8" class="loading">
+                                        <div class="spinner"></div>
+                                        Carregando oportunidades...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parcelas Tab -->
+            <div id="parcelas" class="tab-content">
+                <div class="form-container" id="parcelaForm" style="display: none;">
+                    <h3>Cadastrar Parcela</h3>
+                    <form id="formParcela">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Cliente:</label>
+                                <input type="text" name="cliente" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Vendedor:</label>
+                                <select name="vendedor" required id="selectVendedorParcela">
+                                    <option value="">Selecione um vendedor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Número da Parcela:</label>
+                                <input type="text" name="numero" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Valor (R$):</label>
+                                <input type="number" name="valor" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Data de Vencimento:</label>
+                                <input type="text" name="vencimento" placeholder="DD/MM/AAAA" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Data Pagamento Comissão:</label>
+                                <input type="text" name="pagamentoComissao" placeholder="DD/MM/AAAA" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="primeiraMensalidade"> Primeira Mensalidade
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="recebidaPeloCliente"> Recebida pelo Cliente
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Observações:</label>
+                                <textarea name="observacoes"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="cancelarParcela()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3 class="table-title">Parcelas</h3>
+                        <button class="add-btn" onclick="novaParcela()">+ Nova Parcela</button>
+                    </div>
+                    <div class="table-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Vendedor</th>
+                                    <th>Número</th>
+                                    <th>Valor</th>
+                                    <th>Valor Líquido</th>
+                                    <th>Comissão</th>
+                                    <th>Vencimento</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="parcelasTable">
+                                <tr>
+                                    <td colspan="9" class="loading">
+                                        <div class="spinner"></div>
+                                        Carregando parcelas...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        let currentUser = null;
+        let vendedores = [];
+        let oportunidades = [];
+        let parcelas = [];
+        let dashboardStats = {};
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se já está logado
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showApp();
+            }
+
+            // Event listeners
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('formVendedor').addEventListener('submit', handleVendedorSubmit);
+            document.getElementById('formOportunidade').addEventListener('submit', handleOportunidadeSubmit);
+            document.getElementById('formParcela').addEventListener('submit', handleParcelaSubmit);
+        });
+
+        // Funções de autenticação
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, senha })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showApp();
+                } else {
+                    errorDiv.textContent = data.message;
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Erro ao conectar com o servidor';
+                console.error('Erro no login:', error);
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('email').value = '';
+            document.getElementById('senha').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        function showApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('userName').textContent = currentUser.nome;
+            
+            // Configurar permissões baseadas no tipo de usuário
+            setupUserPermissions();
+            
+            // Carregar dados iniciais
+            loadDashboardData();
+            loadVendedores();
+            loadOportunidades();
+            loadParcelas();
+        }
+
+        function setupUserPermissions() {
+            const vendedoresTab = document.getElementById('vendedoresTab');
+            const oportunidadesTab = document.getElementById('oportunidadesTab');
+            
+            if (currentUser.tipo === 'vendedor') {
+                // Vendedores só veem suas próprias parcelas
+                vendedoresTab.style.display = 'none';
+                oportunidadesTab.style.display = 'none';
+            } else if (currentUser.tipo === 'visualizador') {
+                // Visualizadores não podem criar/editar vendedores e oportunidades
+                const addBtns = document.querySelectorAll('.add-btn');
+                addBtns.forEach(btn => {
+                    if (btn.onclick && (btn.onclick.toString().includes('novoVendedor') || 
+                                       btn.onclick.toString().includes('novaOportunidade'))) {
+                        btn.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Funções de navegação
+        function showTab(tabName) {
+            // Remover classe active de todas as abas
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Adicionar classe active na aba selecionada
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Carregar dados específicos da aba
+            if (tabName === 'dashboard') {
+                loadDashboardData();
+            } else if (tabName === 'vendedores') {
+                loadVendedores();
+            } else if (tabName === 'oportunidades') {
+                loadOportunidades();
+            } else if (tabName === 'parcelas') {
+                loadParcelas();
+            }
+        }
+
+        // Funções de API
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // Dashboard
+        async function loadDashboardData() {
+            try {
+                dashboardStats = await apiCall('/api/dashboard/stats');
+                updateDashboard();
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+            }
+        }
+
+        function updateDashboard() {
+            document.getElementById('totalOportunidades').textContent = dashboardStats.totalOportunidades || 0;
+            document.getElementById('totalVendedores').textContent = dashboardStats.totalVendedores || 0;
+            document.getElementById('totalComissoes').textContent = `R$ ${(dashboardStats.totalComissoes || 0).toFixed(2)}`;
+            document.getElementById('comissoesPagas').textContent = `R$ ${(dashboardStats.comissoesPagas || 0).toFixed(2)}`;
+            document.getElementById('comissoesPendentes').textContent = `R$ ${(dashboardStats.comissoesPendentes || 0).toFixed(2)}`;
+            document.getElementById('totalParcelas').textContent = dashboardStats.totalParcelas || 0;
+            
+            // Calcular percentuais
+            const percentualPago = dashboardStats.totalParcelas > 0 ? 
+                (dashboardStats.parcelasPagas / dashboardStats.totalParcelas * 100) : 0;
+            const percentualComissao = dashboardStats.totalComissoes > 0 ? 
+                (dashboardStats.comissoesPagas / dashboardStats.totalComissoes * 100) : 0;
+            
+            document.getElementById('percentualPago').textContent = `${percentualPago.toFixed(1)}%`;
+            document.getElementById('progressPago').style.width = `${percentualPago}%`;
+            
+            document.getElementById('percentualComissao').textContent = `${percentualComissao.toFixed(1)}%`;
+            document.getElementById('progressComissao').style.width = `${percentualComissao}%`;
+        }
+
+        // Vendedores
+        async function loadVendedores() {
+            try {
+                vendedores = await apiCall('/api/vendedores');
+                updateVendedoresTable();
+            } catch (error) {
+                console.error('Erro ao carregar vendedores:', error);
+                document.getElementById('vendedoresTable').innerHTML = 
+                    '<tr><td colspan="5">Erro ao carregar vendedores</td></tr>';
+            }
+        }
+
+        function updateVendedoresTable() {
+            const tbody = document.getElementById('vendedoresTable');
+            
+            if (vendedores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Nenhum vendedor cadastrado</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = vendedores.map(vendedor => `
+                <tr>
+                    <td>${vendedor.nome}</td>
+                    <td>${vendedor.email}</td>
+                    <td>${vendedor.telefone}</td>
+                    <td>${vendedor.dataAdmissao}</td>
+                    <td>
+                        ${currentUser.tipo === 'master' ? `
+                            <button class="action-btn btn-delete" onclick="deleteVendedor(${vendedor.id})">Excluir</button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Atualizar selects de vendedores
+            updateVendedorSelects();
+        }
+
+        function updateVendedorSelects() {
+            const selects = [document.getElementById('selectVendedor'), document.getElementById('selectVendedorParcela')];
+            
+            selects.forEach(select => {
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">Selecione um vendedor</option>' +
+                        vendedores.map(v => `<option value="${v.nome}">${v.nome}</option>`).join('');
+                    select.value = currentValue;
+                }
+            });
+        }
+
+        function novoVendedor() {
+            if (currentUser.tipo !== 'master') return;
+            document.getElementById('vendedorForm').style.display = 'block';
+            document.getElementById('formVendedor').reset();
+        }
+
+        function cancelarVendedor() {
+            document.getElementById('vendedorForm').style.display = 'none';
+        }
+
+        async function handleVendedorSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                await apiCall('/api/vendedores', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                cancelarVendedor();
+                loadVendedores();
+                loadDashboardData();
+            } catch (error) {
+                alert('Erro ao salvar vendedor: ' + error.message);
+            }
+        }
+
+        async function deleteVendedor(id) {
+            if (!confirm('Tem certeza que deseja excluir este vendedor?')) return;
+            
+            try {
+                await apiCall(`/api/vendedores/${id}`, { method: 'DELETE' });
+                loadVendedores();
+                loadDashboardData();
+            } catch (error) {
+                alert('Erro ao excluir vendedor: ' + error.message);
+            }
+        }
+
+        // Oportunidades
+        async function loadOportunidades() {
+            try {
+                oportunidades = await apiCall('/api/oportunidades');
+                updateOportunidadesTable();
+            } catch (error) {
+                console.error('Erro ao carregar oportunidades:', error);
+                document.getElementById('oportunidadesTable').innerHTML = 
+                    '<tr><td colspan="8">Erro ao carregar oportunidades</td></tr>';
+            }
+        }
+
+        function updateOportunidadesTable() {
+            const tbody = document.getElementById('oportunidadesTable');
+            
+            if (oportunidades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8">Nenhuma oportunidade cadastrada</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = oportunidades.map(oportunidade => `
+                <tr>
+                    <td>${oportunidade.cliente}</td>
+                    <td>${oportunidade.vendedor}</td>
+                    <td>${oportunidade.tipoConta}</td>
+                    <td>R$ ${oportunidade.valorTotal.toFixed(2)}</td>
+                    <td>R$ ${oportunidade.valorLiquido.toFixed(2)}</td>
+                    <td>R$ ${oportunidade.comissao.toFixed(2)}</td>
+                    <td>${oportunidade.dataFechamento}</td>
+                    <td>
+                        ${currentUser.tipo === 'master' ? `
+                            <button class="action-btn btn-delete" onclick="deleteOportunidade(${oportunidade.id})">Excluir</button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function novaOportunidade() {
+            if (currentUser.tipo !== 'master') return;
+            document.getElementById('oportunidadeForm').style.display = 'block';
+            document.getElementById('formOportunidade').reset();
+        }
+
+        function cancelarOportunidade() {
+            document.getElementById('oportunidadeForm').style.display = 'none';
+        }
+
+        async function handleOportunidadeSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                await apiCall('/api/oportunidades', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                cancelarOportunidade();
+                loadOportunidades();
+                loadDashboardData();
+            } catch (error) {
+                alert('Erro ao salvar oportunidade: ' + error.message);
+            }
+        }
+
+        async function deleteOportunidade(id) {
+            if (!confirm('Tem certeza que deseja excluir esta oportunidade?')) return;
+            
+            try {
+                await apiCall(`/api/oportunidades/${id}`, { method: 'DELETE' });
+                loadOportunidades();
+                loadDashboardData();
+            } catch (error) {
+                alert('Erro ao excluir oportunidade: ' + error.message);
+            }
+        }
+
+        // Parcelas
+        async function loadParcelas() {
+            try {
+                parcelas = await apiCall('/api/parcelas');
+                
+                // Filtrar parcelas para vendedores
+                if (currentUser.tipo === 'vendedor') {
+                    parcelas = parcelas.filter(p => p.vendedor === currentUser.nome);
+                }
+                
+                updateParcelasTable();
+            } catch (error) {
+                console.error('Erro ao carregar parcelas:', error);
+                document.getElementById('parcelasTable').innerHTML = 
+                    '<tr><td colspan="9">Erro ao carregar parcelas</td></tr>';
+            }
+        }
+
+        function updateParcelasTable() {
+            const tbody = document.getElementById('parcelasTable');
+            
+            if (parcelas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9">Nenhuma parcela cadastrada</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = parcelas.map(parcela => {
+                let statusHtml = '';
+                
+                if (parcela.primeiraMensalidade) {
+                    statusHtml += '<span class="status-indicator status-primeira" title="Primeira Mensalidade"></span>';
+                }
+                
+                if (parcela.comissaoPaga) {
+                    statusHtml += '<span class="status-indicator status-pago" title="Comissão Paga"></span>';
+                } else {
+                    statusHtml += '<span class="status-indicator status-pendente" title="Comissão Pendente"></span>';
+                }
+                
+                if (parcela.recebidaPeloCliente) {
+                    statusHtml += '<span class="status-indicator status-pago" title="Recebida pelo Cliente"></span>';
+                }
+                
+                return `
+                    <tr>
+                        <td>${parcela.cliente}</td>
+                        <td>${parcela.vendedor}</td>
+                        <td>${parcela.numero}</td>
+                        <td>R$ ${parcela.valor.toFixed(2)}</td>
+                        <td>R$ ${parcela.valorLiquido.toFixed(2)}</td>
+                        <td>R$ ${parcela.comissao.toFixed(2)}</td>
+                        <td>${parcela.vencimento}</td>
+                        <td>${statusHtml}</td>
+                        <td>
+                            ${currentUser.tipo !== 'vendedor' ? `
+                                <button class="action-btn btn-edit" onclick="toggleParcelaStatus(${parcela.id}, 'recebidaPeloCliente', ${!parcela.recebidaPeloCliente})">
+                                    ${parcela.recebidaPeloCliente ? 'Marcar Não Recebida' : 'Marcar Recebida'}
+                                </button>
+                                <button class="action-btn btn-edit" onclick="toggleParcelaStatus(${parcela.id}, 'comissaoPaga', ${!parcela.comissaoPaga})">
+                                    ${parcela.comissaoPaga ? 'Marcar Não Paga' : 'Marcar Paga'}
+                                </button>
+                                <button class="action-btn btn-delete" onclick="deleteParcela(${parcela.id})">Excluir</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function novaParcela() {
+            document.getElementById('parcelaForm').style.display = 'block';
+            document.getElementById('formParcela').reset();
+        }
+
+        function cancelarParcela() {
+            document.getElementById('parcelaForm').style.display = 'none';
+        }
+
+        async function handleParcelaSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Converter checkboxes
+            data.primeiraMensalidade = formData.has('primeiraMensalidade');
+            data.recebidaPeloCliente = formData.has('recebidaPeloCliente');
+            
+            try {
+                await apiCall('/api/parcelas', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                cancelarParcela();
+                loadParcelas();
+                loadDashboardData();
+            } catch (error) {
+                alert('Erro ao salvar parcela: ' + error.message);
+            }
+        }
+
+        async function toggleParcelaStatus(id, field, value) {
+            try {
+                const data = {};
+                data[field] = value;
+                
+                await apiCall(`/api/parcelas/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                
+                loadParcelas();
+                loadDashboardData();
+            } catch (error) {
+                alert('Erro ao atualizar status: ' + error.message);
+            }
+        }
+
+        async function deleteParcela(id) {
+            if (!confirm('Tem certeza que deseja excluir esta parcela?')) return;
+            
+            try {
+                await apiCall(`/api/parcelas/${id}`, { method: 'DELETE' });
+                loadParcelas();
+                loadDashboardData();
+            } catch (error) {
+                alert('Erro ao excluir parcela: ' + error.message);
+            }
+        }
+
+        // Utilitários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+    </script>
+</body>
+</html>
+
